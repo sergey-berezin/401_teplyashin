@@ -23,8 +23,6 @@ namespace ClassLibrary2
             return await Task<(string, float)[]>.Factory.StartNew(() => {
                 string[] keys = { "neutral", "happiness", "surprise", "sadness", "anger", "disgust", "fear", "contempt" };
                 var res = new (string, float)[keys.Length];
-                if (token.IsCancellationRequested)
-                   return res;
                 using Image<Rgb24> image = Image.Load<Rgb24>(path);
                 image.Mutate(ctx => {
                     ctx.Resize(new Size(64, 64));

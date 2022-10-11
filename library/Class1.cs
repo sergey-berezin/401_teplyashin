@@ -41,7 +41,7 @@ namespace ClassLibrary2
                         res[i] = (keys[i], emotions[i]);
                 }
                 return res;
-            }, token, TaskCreationOptions.LongRunning);
+            }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
         }
         DenseTensor<float> GrayscaleImageToTensor(Image<Rgb24> img)

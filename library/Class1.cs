@@ -10,6 +10,7 @@ namespace ClassLibrary2
     public class Class1
     {
         private InferenceSession? session = null;
+        static Semaphore sem = new Semaphore(1, 1);
         public Class1()
         {
             using var modelStream = typeof(Class1).Assembly.GetManifestResourceStream("ClassLibrary2.emotion-ferplus-7.onnx");
@@ -28,7 +29,9 @@ namespace ClassLibrary2
                     ctx.Resize(new Size(64, 64));
                 });
                 var inputs = new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor("Input3", GrayscaleImageToTensor(image)) };
+                sem.WaitOne();
                 using IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results = session.Run(inputs);
+                sem.Release();
                 var emotions = Softmax(results.First(v => v.Name == "Plus692_Output_0").AsEnumerable<float>().ToArray());
                 for (int i = 0; i < keys.Length; i++)
                 {

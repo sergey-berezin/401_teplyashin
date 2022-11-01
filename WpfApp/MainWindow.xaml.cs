@@ -78,6 +78,7 @@ namespace WpfApp
 
         private async void command_open(object sender, RoutedEventArgs e)
         {
+            Files_selection.IsEnabled = false;
             pbStatus.Value = 0;
             this.source = new CancellationTokenSource();
             this.token = source.Token;
@@ -87,7 +88,10 @@ namespace WpfApp
             var result = dialog.ShowDialog();
             int len = dialog.FileNames.Length;
             if (len == 0)
+            {
+                Files_selection.IsEnabled = true;
                 return;
+            }
             int step = 500 / len;
             var tasks = new List<Task<(string, float)[]>>();
             var paths = dialog.FileNames;
@@ -149,6 +153,7 @@ namespace WpfApp
             }
             if (flag)
                 pbStatus.Value = 1000;
+            Files_selection.IsEnabled = true;
         }
 
         private void command_stop(object sender, RoutedEventArgs e)

@@ -5,3 +5,9 @@
 
 WpfApp_lab3:  
 Для работы необходимо указать свой путь к ImageDataBase.db в файле MainWindow.xaml.cs, строка 37
+
+lab4:  
+Сервер запускается на порту 7200  
+Для работы нужно создать базу данных:
+  dotnet ef migrations add "Initial"
+  dotnet ef database update

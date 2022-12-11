@@ -8,6 +8,6 @@ WpfApp_lab3:
 
 lab4:  
 Сервер запускается на порту 7200  
-Для работы нужно создать базу данных:
+Для работы нужно создать базу данных:  
     dotnet ef migrations add "Initial"
     dotnet ef database update

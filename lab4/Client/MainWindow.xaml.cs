@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,6 +18,8 @@ using System.Collections.ObjectModel;
 using Newtonsoft.Json;
 using Contracts;
 using System.Net.Http;
+using Polly;
+using Polly.Retry;
 
 namespace WpfApp
 {
@@ -39,9 +41,11 @@ namespace WpfApp
         ObservableCollection<Image> disgust = new();
         ObservableCollection<Image> fear = new();
         ObservableCollection<Image> contempt = new();
+        AsyncRetryPolicy retryPolicy;
         public MainWindow()
         {
             InitializeComponent();
+            retryPolicy = Policy.Handle<HttpRequestException>().WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
             LoadData();
             lv_neutral.ItemsSource = neutral;
             lv_happiness.ItemsSource = happiness;
@@ -56,44 +60,55 @@ namespace WpfApp
         public async void LoadData()
         {
             HttpClient client = new HttpClient();
-            string result = await client.GetStringAsync(url);
-            var ids = JsonConvert.DeserializeObject<List<int>>(result);
-            foreach (var id in ids)
+            try
             {
-                var status = await client.GetAsync($"{url}/{id}");
-                if (status.StatusCode != System.Net.HttpStatusCode.OK)
-                    continue;
-                var res = await client.GetStringAsync($"{url}/{id}");
-                var img = JsonConvert.DeserializeObject<Image>(res);
-                switch (img.category)
+                await retryPolicy.ExecuteAsync(async () =>
                 {
-                    case "neutral":
-                        neutral.Add(img);
-                        break;
-                    case "happiness":
-                        happiness.Add(img);
-                        break;
-                    case "surprise":
-                        surprise.Add(img);
-                        break;
-                    case "sadness":
-                        sadness.Add(img);
-                        break;
-                    case "anger":
-                        anger.Add(img);
-                        break;
-                    case "disgust":
-                        disgust.Add(img);
-                        break;
-                    case "fear":
-                        fear.Add(img);
-                        break;
-                    case "contempt":
-                        contempt.Add(img);
-                        break;
-                    default:
-                        break;
-                }
+                    string result = await client.GetStringAsync(url);
+                    var ids = JsonConvert.DeserializeObject<List<int>>(result);
+                    foreach (var id in ids)
+                    {
+                        var status = await client.GetAsync($"{url}/{id}");
+                        if (status.StatusCode != System.Net.HttpStatusCode.OK)
+                            break;
+                            //return status;
+                        var res = await client.GetStringAsync($"{url}/{id}");
+                        var img = JsonConvert.DeserializeObject<Image>(res);
+                        switch (img.category)
+                        {
+                            case "neutral":
+                                neutral.Add(img);
+                                    break;
+                                case "happiness":
+                                    happiness.Add(img);
+                                    break;
+                                case "surprise":
+                                    surprise.Add(img);
+                                    break;
+                                case "sadness":
+                                    sadness.Add(img);
+                                    break;
+                                case "anger":
+                                    anger.Add(img);
+                                    break;
+                                case "disgust":
+                                    disgust.Add(img);
+                                    break;
+                                case "fear":
+                                    fear.Add(img);
+                                    break;
+                                case "contempt":
+                                    contempt.Add(img);
+                                    break;
+                                default:
+                                    break;
+                        }
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
             }
         }
 
@@ -121,65 +136,78 @@ namespace WpfApp
             {
                 try
                 {
-                    string path = dialog.FileNames[i];
-                    byte[] img_ = File.ReadAllBytes(path);
-                    Data obj = new Data(img_, path);
-                    var s = JsonConvert.SerializeObject(obj);
-                    var c = new StringContent(s);
-                    c.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-                    var status_1 = await client.PostAsync(url, c, token);
-                    if (status_1.StatusCode != System.Net.HttpStatusCode.OK)
+                    await retryPolicy.ExecuteAsync(async () =>
                     {
-                        pbStatus.Value += step;
-                        continue;
-                    }
-                    var id = JsonConvert.DeserializeObject<int>(status_1.Content.ReadAsStringAsync().Result);
-                    if (id == -1)
-                    {
-                        flag = false;
-                        break;
-                    }
-                    var status_2 = await client.GetAsync($"{url}/{id}");
-                    if (status_2.StatusCode != System.Net.HttpStatusCode.OK)
-                    {
-                        pbStatus.Value += step;
-                        continue;
-                    }
-                    string res = await client.GetStringAsync($"{url}/{id}");
-                    var img = JsonConvert.DeserializeObject<Image>(res);
-                    switch (img.category)
-                    {
-                        case "neutral":
-                            neutral.Add(img);
-                            break;
-                        case "happiness":
-                            happiness.Add(img);
-                            break;
-                        case "surprise":
-                            surprise.Add(img);
-                            break;
-                        case "sadness":
-                            sadness.Add(img);
-                            break;
-                        case "anger":
-                            anger.Add(img);
-                            break;
-                        case "disgust":
-                            disgust.Add(img);
-                            break;
-                        case "fear":
-                            fear.Add(img);
-                            break;
-                        case "contempt":
-                            contempt.Add(img);
-                            break;
-                        default:
-                            break;
-                    }
+                        string path = dialog.FileNames[i];
+                        byte[] img_ = File.ReadAllBytes(path);
+                        Data obj = new Data(img_, path);
+                        var s = JsonConvert.SerializeObject(obj);
+                        var c = new StringContent(s);
+                        c.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+                        var status_1 = await client.PostAsync(url, c, token);
+                        if (status_1.StatusCode != System.Net.HttpStatusCode.OK)
+                        {
+                            pbStatus.Value += step;
+                            throw new Exception("Bad posting 1");
+                            //continue;
+                        }
+                        var id = JsonConvert.DeserializeObject<int>(status_1.Content.ReadAsStringAsync().Result);
+                        if (id == -1)
+                        {
+                            flag = false;
+                            throw new Exception("Bad posting 2");
+                            //break;
+                        }
+                        else if (id == -2)
+                        {
+                            pbStatus.Value += step;
+                            throw new Exception("Image is in DB already");
+                            //continue;
+                        }
+                        var status_2 = await client.GetAsync($"{url}/{id}");
+                        if (status_2.StatusCode != System.Net.HttpStatusCode.OK)
+                        {
+                            pbStatus.Value += step;
+                            //break;
+                            throw new Exception("Bad response");
+                        }
+                        string res = await client.GetStringAsync($"{url}/{id}");
+                        var img = JsonConvert.DeserializeObject<Image>(res);
+                        switch (img.category)
+                        {
+                            case "neutral":
+                                neutral.Add(img);
+                                break;
+                            case "happiness":
+                                happiness.Add(img);
+                                break;
+                            case "surprise":
+                                surprise.Add(img);
+                                break;
+                            case "sadness":
+                                sadness.Add(img);
+                                break;
+                            case "anger":
+                                anger.Add(img);
+                                break;
+                            case "disgust":
+                                disgust.Add(img);
+                                break;
+                            case "fear":
+                                fear.Add(img);
+                                break;
+                            case "contempt":
+                                contempt.Add(img);
+                                break;
+                            default:
+                                break;
+                        }
+                    });
                     pbStatus.Value += step;
                 }
-                catch (OperationCanceledException e_)
+                catch (Exception e_)
                 {
+                    MessageBox.Show(e_.Message);
                     continue;
                 }
             }
@@ -201,15 +229,25 @@ namespace WpfApp
             del.IsEnabled = false;
             tab_ctrl.IsEnabled = false;
             HttpClient client = new HttpClient();
-            var status = await client.DeleteAsync(url);
-            neutral.Clear();
-            happiness.Clear();
-            surprise.Clear();
-            sadness.Clear();
-            anger.Clear();
-            disgust.Clear();
-            fear.Clear();
-            contempt.Clear();
+            try
+            {
+                await retryPolicy.ExecuteAsync(async () =>
+                {
+                    var status = await client.DeleteAsync(url);
+                    neutral.Clear();
+                    happiness.Clear();
+                    surprise.Clear();
+                    sadness.Clear();
+                    anger.Clear();
+                    disgust.Clear();
+                    fear.Clear();
+                    contempt.Clear();
+                });
+            }
+            catch (Exception e_)
+            {
+                MessageBox.Show(e_.Message);
+            }
             del.IsEnabled = true;
             tab_ctrl.IsEnabled = true;
         }

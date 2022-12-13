@@ -36,9 +36,9 @@ namespace Server.Database
                 using (var db = new LibraryContext())
                 {
                     var hash_ = img_.GetHashCode();
-                    if (!db.Hashes.Any(x => x.hash == hash_))
+                    if (!db.Hashes.Where(x => x.hash == hash_).Any())
                     {
-                        if (!db.ByteImages.Any(x => x.byteImage.Equals(img_)))
+                        if (!db.ByteImages.Where(x => x.byteImage.Equals(img_)).Any())
                         {
                             var task_ = cls.process(path, token);
                             await task_;
@@ -60,7 +60,8 @@ namespace Server.Database
                             return id;
                         }
                     }
-                    return db.Hashes.Where(x => x.hash == hash_).First().imageID;
+                    //int id_ = db.ByteImages.Where(x => x.byteImage.Equals(img_)).First().imageID;
+                    return -2;
                 }
             }
             catch (OperationCanceledException e)

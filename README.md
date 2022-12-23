@@ -12,3 +12,6 @@ lab4:
     
     dotnet ef migrations add "Initial"  
     dotnet ef database update
+
+lab5:  
+Клиент работает с сервером из lab4, изображения берутся из папки lab5/images

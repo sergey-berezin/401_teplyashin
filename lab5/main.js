@@ -69,7 +69,7 @@ async function upload_data(event){
             reader.readAsDataURL(f)
         })
         let img = (await prms).split(',')[1]
-        const request_data = {
+        const post_request = {
             mode: 'cors',
             method: 'POST',
             headers: {
@@ -81,7 +81,7 @@ async function upload_data(event){
                 "path": loc.slice(3, loc.length - 11) + "images/" + name
             })
         }
-        let response = await fetch(url, request_data)
+        let response = await fetch(url, post_request)
         let id = await response.json()
         if (id >= 0)
             await add(id)

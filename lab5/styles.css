@@ -1,0 +1,56 @@
+.buttons{
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 10px 10px;
+    display: flex;
+    background-color: #008CBA;
+}
+
+.tabs>input[type="radio"] {
+  display: none;
+}
+
+.tabs>input[type="radio"]:checked+label {
+  background-color: #bdbdbd;
+}
+
+.tabs>div {
+  /* скрыть контент по умолчанию */
+  display: none;
+  border: 1px solid #eee;
+  padding: 10px 15px;
+  border-radius: 4px;
+}
+
+/* отобразить контент, связанный с вабранной радиокнопкой (input type="radio") */
+#tab-btn-1:checked~#neutral,
+#tab-btn-2:checked~#happiness,
+#tab-btn-3:checked~#surprise,
+#tab-btn-4:checked~#sadness,
+#tab-btn-5:checked~#anger,
+#tab-btn-6:checked~#disgust,
+#tab-btn-7:checked~#fear,
+#tab-btn-8:checked~#contempt {
+  display: block;
+}
+
+.tabs>label {
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+  user-select: none;
+  background-color: #eee;
+  border: 1px solid transparent;
+  padding: 2px 8px;
+  font-size: 16px;
+  line-height: 1.5;
+  border-radius: 4px;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+  margin-right: 6px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.tabs>label:first-of-type {
+  margin-left: 0;
+}

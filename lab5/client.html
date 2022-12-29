@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>WebClient</title>
+    <link href="styles.css" rel="stylesheet"/>  
+</head>
+<body>
+    <div class="buttons">
+        <input type="file" id="input" multiple="true" style="display:none">
+        <input type="button" id="selector" value="Выберите файлы" onclick='select_files(this)'>
+    </div>
+    <div class="tabs">
+        <input type="radio" name="tab-btn" id="tab-btn-1" value="" checked>
+        <label for="tab-btn-1">neutral</label>
+        <input type="radio" name="tab-btn" id="tab-btn-2" value="">
+        <label for="tab-btn-2">happiness</label>
+        <input type="radio" name="tab-btn" id="tab-btn-3" value="">
+        <label for="tab-btn-3">surprise</label>
+        <input type="radio" name="tab-btn" id="tab-btn-4" value="">
+        <label for="tab-btn-4">sadness</label>
+        <input type="radio" name="tab-btn" id="tab-btn-5" value="">
+        <label for="tab-btn-5">anger</label>
+        <input type="radio" name="tab-btn" id="tab-btn-6" value="">
+        <label for="tab-btn-6">disgust</label>
+        <input type="radio" name="tab-btn" id="tab-btn-7" value="">
+        <label for="tab-btn-7">fear</label>
+        <input type="radio" name="tab-btn" id="tab-btn-8" value="">
+        <label for="tab-btn-8">contempt</label>
+        <div id="neutral"></div>
+        <div id="happiness"></div>
+        <div id="surprise"></div>
+        <div id="sadness"></div>
+        <div id="anger"></div>
+        <div id="disgust"></div>
+        <div id="fear"></div>
+        <div id="contempt"></div>
+    </div>
+    <script src="main.js"> </script>
+</body>
